@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banking Digital Maturity Assessment Tool — Team 1</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #0f3d5e;
+      --primary-light: #1b5e8a;
+      --accent: #008080;
+      --bg: #f4f7f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+      --highlight-bg: #ecfdf5;
+      --highlight-border: #059669;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(15, 61, 94, 0.15);
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.75rem;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.92;
+      font-size: 0.95rem;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .dimension-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .dimension-header {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .dimension-header h2 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 1.25rem;
+    }
+
+    .question-block {
+      margin-bottom: 1.5rem;
+      padding: 1.15rem;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .question-block.unanswered {
+      border-color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    .question-title {
+      font-weight: 700;
+      margin-bottom: 0.45rem;
+      display: block;
+      color: #0f172a;
+    }
+
+    .question-example {
+      font-size: 0.88rem;
+      color: var(--muted);
+      background: #eef2f6;
+      border-left: 3px solid var(--accent);
+      padding: 0.45rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 0.85rem;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.5rem 0.65rem;
+      margin-bottom: 0.35rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .option-label:hover {
+      background: #e2e8f0;
+    }
+
+    .option-label input[type="radio"] {
+      margin-top: 0.32rem;
+      accent-color: var(--primary);
+    }
+
+    .error-banner {
+      display: none;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-light);
+    }
+
+    /* Results Section - Hidden until valid submission */
+    #results-section {
+      display: none;
+      margin-top: 2.5rem;
+      background: var(--card-bg);
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 6px 20px rgba(15, 61, 94, 0.12);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .score-table th,
+    .score-table td {
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .score-table th {
+      background: #f1f5f9;
+      color: var(--primary);
+    }
+
+    .badge-low {
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      margin-left: 0.4rem;
+      display: inline-block;
+    }
+
+    .badge-match {
+      background: #059669;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .interpretation-box {
+      background: #f0f9ff;
+      border-left: 5px solid var(--primary);
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-top: 1.5rem;
+    }
+
+    .interpretation-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .pattern-pill {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .next-action {
+      background: #ffffff;
+      border: 1px solid #bae6fd;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+
+    .stage-reference {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px dashed #93c5fd;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    /* Full Blended Interpretation Guide Matrix */
+    .guide-section {
+      margin-top: 2.25rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .guide-section h3 {
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .guide-intro {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .archetype-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.15rem 1.35rem;
+      margin-bottom: 1rem;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+
+    .archetype-card.matched-archetype {
+      background: var(--highlight-bg);
+      border: 2px solid var(--highlight-border);
+      box-shadow: 0 3px 10px rgba(5, 150, 105, 0.12);
+    }
+
+    .archetype-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .archetype-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--primary);
+    }
+
+    .archetype-card.matched-archetype .archetype-title {
+      color: #065f46;
+    }
+
+    .archetype-signal {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .archetype-action {
+      font-size: 0.92rem;
+      margin-top: 0.5rem;
+      color: #0f172a;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Banking Digital Maturity Assessment</h1>
+      <p>Answer all 20 diagnostic questions across the five banking capability dimensions to visualize your maturity profile, identify priority capability gaps, and surface your strategic recommendation.</p>
+    </header>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button type="button" class="btn-secondary" onclick="fillPatternDemo('foundation_gap')">Demo 1: Foundation Gap</button>
+        <button type="button" class="btn-secondary" onclick="fillPatternDemo('optimized_bank')">Demo 2: Optimized Bank</button>
+        <button type="button" class="btn-secondary" onclick="fillPatternDemo('data_bottleneck')">Demo 3: Data Bottleneck</button>
+        <button type="button" class="btn-secondary" onclick="fillPatternDemo('digitalized_not_transforming')">Demo 4: Digitalized Veneer</button>
+        <button type="button" class="btn-secondary" onclick="fillPatternDemo('execution_gap')">Demo 5: Execution Gap</button>
+      </div>
+      <button type="button" class="btn-secondary" onclick="resetAssessment()">Reset Form</button>
+    </div>
+
+    <form id="assessment-form" novalidate>
+      <div id="questions-container"></div>
+
+      <div id="error-banner" class="error-banner">
+        Please answer all highlighted questions before calculating your maturity results.
+      </div>
+
+      <button type="submit" class="submit-btn">Calculate Digital Banking Maturity</button>
+    </form>
+
+    <section id="results-section" aria-live="polite">
+      <h2>Assessment Results &amp; Strategic Diagnosis</h2>
+
+      <div class="results-grid">
+        <div class="chart-wrapper">
+          <canvas id="maturityRadarChart"></canvas>
+        </div>
+
+        <div>
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>Capability Dimension</th>
+                <th>Score (1–5)</th>
+              </tr>
+            </thead>
+            <tbody id="score-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Primary Personalized Diagnosis -->
+      <div class="interpretation-box" id="interpretation-output"></div>
+
+      <!-- Blended Team 1 Interpretation Guide -->
+      <div class="guide-section">
+        <h3>Banking Digital Maturity Assessment Interpretation Guide (Team 1)</h3>
+        <p class="guide-intro">
+          Maturity scores carry different strategic implications depending on the pattern across dimensions rather than a single average. Your bank's matched pattern is highlighted below alongside all five strategic archetypes.
+        </p>
+        <div id="full-guide-container"></div>
+      </div>
+    </section>
+
+    <footer>
+      Team 1 &bull; Banking Digital Maturity Self-Assessment Tool &bull; ISM 6346 Digital Business Transformation
+    </footer>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. DATA STRUCTURE (Member A Dimensions + Member B Questions + Team 1 Guide)
+    // =========================================================================
+    const ASSESSMENT_DATA = {
+      industry: "Digital Banking",
+      dimensions: [
+        {
+          id: "D1",
+          name: "Digital Banking Strategy and Governance",
+          stages: {
+            1: "Stage 1 - Initial: Digital banking investments are approved individually in response to operational problems, regulatory requirements, or competitor activity. The bank has no consistently applied enterprise digital priorities, and business outcomes are not systematically measured.",
+            2: "Stage 2 - Emerging: Bank leadership has identified digital priorities, such as mobile banking enhancements or core system modernization, but individual departments manage implementation independently. Funding and performance reviews focus primarily on project delivery rather than measurable banking outcomes.",
+            3: "Stage 3 - Defined: The bank maintains a documented digital strategy aligned with objectives such as reducing account-opening costs, improving customer retention, or accelerating lending decisions. Executive sponsors review defined performance indicators and use standardized criteria to prioritize digital investments.",
+            4: "Stage 4 - Integrated: Digital investment decisions are coordinated across retail banking, commercial banking, operations, technology, risk, and compliance. Executive governance routinely evaluates realized benefits, reallocates resources based on performance, and applies consistent oversight to technology and AI-related risks.",
+            5: "Stage 5 - Optimized: The board and executive leadership regularly evaluate digital performance against strategic objectives, customer outcomes, financial benefits, and risk indicators. Investment decisions are continuously refined using measured results, with demonstrated accountability for benefits realization and responsible innovation."
+          },
+          questions: [
+            {
+              id: "Q1",
+              number: 1,
+              text: "How does your bank keep up with the technology and digital services offered by competing banks?",
+              example: "Looking at what other banks offer through their mobile apps, online banking platforms, or security features to see where improvements could be made.",
+              options: [
+                { value: 1, label: "We do not really compare our digital services with those of other banks." },
+                { value: 2, label: "We sometimes look at what competitors are offering, usually when a customer brings something to our attention." },
+                { value: 3, label: "We have a regular process for reviewing the digital services offered by competing banks." },
+                { value: 4, label: "We compare our services with competitors and use what we learn to plan improvements." },
+                { value: 5, label: "We regularly review competitors, customer expectations, and our own results to make sure our digital services continue to improve." }
+              ]
+            },
+            {
+              id: "Q2",
+              number: 2,
+              text: "How involved is your bank's leadership in making sure cybersecurity is taken seriously?",
+              example: "Bank executives reviewing security reports, discussing possible threats, and making sure the bank has the resources needed to protect customer information.",
+              options: [
+                { value: 1, label: "Cybersecurity is mostly left to the IT department, with little involvement from leadership." },
+                { value: 2, label: "Leadership gets involved when a security problem comes up, but security is not discussed regularly." },
+                { value: 3, label: "Leadership reviews cybersecurity risks during scheduled meetings and follows an established security plan." },
+                { value: 4, label: "Leadership regularly reviews security performance and makes decisions based on identified risks." },
+                { value: 5, label: "Cybersecurity is part of major business decisions, and leadership uses security testing, reports, and performance results to keep improving protections." }
+              ]
+            },
+            {
+              id: "Q3",
+              number: 3,
+              text: "How does your bank know whether its technology improvements are actually working?",
+              example: "After introducing a new mobile banking feature, the bank checks whether customers are using it and whether it has reduced calls to customer support.",
+              options: [
+                { value: 1, label: "We usually do not measure whether technology improvements are successful." },
+                { value: 2, label: "We sometimes check results, but there is no consistent way of doing it." },
+                { value: 3, label: "We set goals for major technology projects and review whether those goals were met." },
+                { value: 4, label: "We regularly track results such as customer usage, employee productivity, and service improvements." },
+                { value: 5, label: "We use those results, along with customer feedback, to decide what needs to change and where future investments should go." }
+              ]
+            },
+            {
+              id: "Q4",
+              number: 4,
+              text: "How does your bank decide which new technologies are worth investing in?",
+              example: "Deciding whether the bank would benefit more from an improved mobile app, stronger security systems, or software that automates repetitive work.",
+              options: [
+                { value: 1, label: "Technology purchases are usually made when something breaks or needs to be replaced." },
+                { value: 2, label: "We consider new technology when a problem comes up, but we do not have a consistent evaluation process." },
+                { value: 3, label: "We review costs, benefits, and security concerns before approving major technology purchases." },
+                { value: 4, label: "We prioritize investments based on business needs, customer feedback, and expected results." },
+                { value: 5, label: "We regularly review how our investments are performing and adjust our plans as technology and business needs change." }
+              ]
+            }
+          ]
+        },
+        {
+          id: "D2",
+          name: "Banking Workforce Digital Capabilities",
+          stages: {
+            1: "Stage 1 - Initial: Digital expertise is concentrated within IT, while most banking employees rely on established manual procedures and specialist support. Training primarily covers basic system operation, with little evidence that employees use data or digital tools to improve work.",
+            2: "Stage 2 - Emerging: Selected departments have employees capable of using analytics, workflow tools, or digital banking applications beyond basic transactions. Digital training and change initiatives occur within individual functions, but adoption and proficiency vary considerably across the bank.",
+            3: "Stage 3 - Defined: The bank has established role-specific digital competencies for functions such as lending, branch operations, fraud management, and customer service. Managers monitor adoption and proficiency, while employees regularly use digital tools and operational data in defined business processes.",
+            4: "Stage 4 - Integrated: Cross-functional teams combine banking expertise with technology, analytics, and process-improvement capabilities to redesign services and workflows. Employees consistently use approved digital tools, and adoption metrics demonstrate sustained changes in working practices.",
+            5: "Stage 5 - Optimized: Digital capability development is embedded in workforce planning, performance management, and continuous improvement across banking functions. Employees and managers independently identify, evaluate, and implement technology-enabled improvements, with measured gains in productivity, quality, or customer outcomes."
+          },
+          questions: [
+            {
+              id: "Q5",
+              number: 5,
+              text: "What does your bank do to make sure employees know how to use new technology?",
+              example: "Providing training when employees start using a new banking system, AI assistant, or internal knowledge base.",
+              options: [
+                { value: 1, label: "Employees are mostly expected to figure out new technology on their own." },
+                { value: 2, label: "Some training is available, but it depends on the department or the system being introduced." },
+                { value: 3, label: "Employees receive organized training whenever important new systems are introduced." },
+                { value: 4, label: "Training is provided regularly, and managers check whether employees understand how to use the tools." },
+                { value: 5, label: "Training is updated based on employee feedback, skill levels, and how well the technology is being used in everyday work." }
+              ]
+            },
+            {
+              id: "Q6",
+              number: 6,
+              text: "Does your bank check whether employees are actually using the technology provided to them?",
+              example: "Looking at usage reports to see how many employees are using an internal AI assistant or knowledge base after being trained.",
+              options: [
+                { value: 1, label: "We do not track whether employees are using the technology." },
+                { value: 2, label: "Managers occasionally ask employees if they are using certain tools." },
+                { value: 3, label: "We collect usage information for important applications and review it from time to time." },
+                { value: 4, label: "We regularly review usage reports to identify employees or departments that may need help." },
+                { value: 5, label: "We look at both usage and productivity results, then use that information to improve training and help employees get more value from the tools." }
+              ]
+            },
+            {
+              id: "Q7",
+              number: 7,
+              text: "How does your bank help employees who are uncomfortable with new technology or do not want to use it?",
+              example: "Sitting down with an employee who avoids using a new AI tool and showing them how it could make a specific part of their job easier.",
+              options: [
+                { value: 1, label: "Employees are expected to adapt, even if they are having trouble." },
+                { value: 2, label: "We provide extra instructions when someone asks for help." },
+                { value: 3, label: "Employees have access to training sessions or support staff when they need assistance." },
+                { value: 4, label: "Managers identify employees who are struggling and offer more personalized training." },
+                { value: 5, label: "We work directly with employees to understand what is holding them back, provide support that fits their needs, and check whether it helped them become more comfortable with the technology." }
+              ]
+            },
+            {
+              id: "Q8",
+              number: 8,
+              text: "How much input do employees have when it comes to improving the digital tools they use?",
+              example: "An employee notices that a certain banking task takes too many steps and suggests a way to make the process easier.",
+              options: [
+                { value: 1, label: "Employees do not have a clear way to suggest technology improvements." },
+                { value: 2, label: "Employees can share ideas with their managers, but those suggestions are not always reviewed." },
+                { value: 3, label: "We have a process for collecting and reviewing employee suggestions." },
+                { value: 4, label: "Employee suggestions are regularly considered when deciding which systems or processes to improve." },
+                { value: 5, label: "Employees help test changes, and we use their feedback to make improvements and measure whether those changes are helping." }
+              ]
+            }
+          ]
+        },
+        {
+          id: "D3",
+          name: "Core Banking Technology and Data Infrastructure",
+          stages: {
+            1: "Stage 1 - Initial: Core banking, lending, payment, and customer information systems operate largely as disconnected platforms, requiring manual data transfers or duplicate entry. Customer and transaction data are fragmented, making reliable cross-functional reporting difficult.",
+            2: "Stage 2 - Emerging: The bank has implemented selected system interfaces, data repositories, or cloud-based services, but important banking processes still depend on batch transfers and manual reconciliation. Data definitions and access controls are inconsistent across major applications.",
+            3: "Stage 3 - Defined: Standardized interfaces connect major banking applications, and governed data repositories support recurring reporting and analytics. Documented data ownership, quality controls, and integration procedures provide reliable access to critical customer, account, and transaction information.",
+            4: "Stage 4 - Integrated: Core banking platforms, payment systems, lending applications, and customer channels exchange governed information through reusable interfaces and automated data pipelines. Data quality, availability, security, and integration performance are continuously monitored, supporting near-real-time operational visibility where needed.",
+            5: "Stage 5 - Optimized: The bank operates resilient, interoperable banking platforms with governed, reusable data products supporting analytics, digital services, and controlled AI/ML workloads. Automated monitoring and remediation maintain demonstrated standards for data quality, security, availability, and recovery while enabling rapid introduction of new banking capabilities."
+          },
+          questions: [
+            {
+              id: "Q9",
+              number: 9,
+              text: "How easily can employees find the customer information they need to do their jobs?",
+              example: "A customer calls with questions about their checking account and a recent loan payment. The employee can see the information they are authorized to access without opening several different applications.",
+              options: [
+                { value: 1, label: "Customer information is spread across different systems, and employees often have to request information from other departments." },
+                { value: 2, label: "Some information is shared between systems, but employees still have to switch between several applications." },
+                { value: 3, label: "Our main banking systems are connected, making it easier for authorized employees to find customer information." },
+                { value: 4, label: "Most customer information is available through connected systems and stays updated with little delay." },
+                { value: 5, label: "Employees can securely access the information needed for their jobs through an integrated system, and we regularly improve how that information is managed and shared." }
+              ]
+            },
+            {
+              id: "Q10",
+              number: 10,
+              text: "How does your bank make sure employees only have access to the customer information they need?",
+              example: "A teller can access the information needed to assist a customer but cannot view sensitive records or change settings that are outside their job responsibilities.",
+              options: [
+                { value: 1, label: "Employees may have access to information that is not necessary for their jobs." },
+                { value: 2, label: "Some restrictions are in place, but access permissions are not reviewed consistently." },
+                { value: 3, label: "Employee access is based on job responsibilities, and the bank follows a documented access control policy." },
+                { value: 4, label: "Access permissions are regularly reviewed and updated when employees change positions or leave the bank." },
+                { value: 5, label: "Access is closely monitored, unnecessary permissions are removed promptly, and the bank regularly tests its controls to make sure sensitive information remains protected." }
+              ]
+            },
+            {
+              id: "Q11",
+              number: 11,
+              text: "How does your bank make sure customer information stays accurate across different systems?",
+              example: "When a customer changes their address, the updated information appears correctly in the systems that need it.",
+              options: [
+                { value: 1, label: "Information is maintained separately, and errors are usually found when someone notices a problem." },
+                { value: 2, label: "Some systems share updates, but employees still have to correct information manually." },
+                { value: 3, label: "We have established procedures for checking and updating customer information." },
+                { value: 4, label: "We regularly monitor data accuracy and have assigned employees responsible for fixing inconsistencies." },
+                { value: 5, label: "Automated checks help identify errors, and we use the results to improve data accuracy across our banking systems." }
+              ]
+            },
+            {
+              id: "Q12",
+              number: 12,
+              text: "How well do your bank's technology systems work together?",
+              example: "A customer makes a payment through mobile banking, and the transaction is reflected correctly in the bank's account and payment systems.",
+              options: [
+                { value: 1, label: "Many of our systems operate separately and require employees to move information manually." },
+                { value: 2, label: "Some systems are connected, but delays and manual work are still common." },
+                { value: 3, label: "Our main systems are connected and follow established procedures for sharing information." },
+                { value: 4, label: "Most systems exchange information reliably, and we regularly monitor them for performance issues." },
+                { value: 5, label: "Our systems are designed to work together securely, and we use performance data to identify problems early and improve reliability." }
+              ]
+            }
+          ]
+        },
+        {
+          id: "D4",
+          name: "Digital Banking Operations and Process Integration",
+          stages: {
+            1: "Stage 1 - Initial: Banking activities such as account opening, loan processing, payment exceptions, and customer servicing depend heavily on manual reviews, rekeying, and departmental handoffs. End-to-end process performance is rarely measured, and staff frequently resolve exceptions outside formal workflows.",
+            2: "Stage 2 - Emerging: Individual activities, such as identity verification, document collection, or transaction screening, have been digitized or automated. However, processes continue to cross disconnected systems, and employees manually coordinate many approvals, exceptions, and handoffs.",
+            3: "Stage 3 - Defined: Major banking processes have documented owners, standardized workflows, and performance measures such as processing time, error rate, and straight-through processing percentage. Rules-based automation handles repeatable activities, while selected predictive models may assist decisions under defined controls.",
+            4: "Stage 4 - Integrated: End-to-end workflows connect banking functions with automated routing, exception management, and measurable service performance. Production AI/ML models support appropriate activities such as fraud detection, risk assessment, or transaction monitoring, with documented validation, human oversight, and ongoing performance monitoring.",
+            5: "Stage 5 - Optimized: The bank continuously improves end-to-end banking processes using process-performance data, automation analytics, and controlled experimentation. Governed AI/ML and automation capabilities are monitored for accuracy, risk, operational effectiveness, and financial value, with documented evidence of sustained improvements in service quality, efficiency, and control effectiveness."
+          },
+          questions: [
+            {
+              id: "Q13",
+              number: 13,
+              text: "How does your bank decide which everyday tasks should be automated?",
+              example: "Automating repetitive work such as collecting documents, answering basic customer questions, or updating routine account information.",
+              options: [
+                { value: 1, label: "Most tasks are handled manually, and we do not actively look for ways to automate them." },
+                { value: 2, label: "A few tasks have been automated when departments noticed an opportunity." },
+                { value: 3, label: "We have a process for identifying repetitive tasks that could benefit from automation." },
+                { value: 4, label: "We measure whether automation is saving time, reducing mistakes, or helping employees work more efficiently." },
+                { value: 5, label: "We regularly look for new opportunities, review the results of existing automation, and make improvements based on what is working." }
+              ]
+            },
+            {
+              id: "Q14",
+              number: 14,
+              isAiIndicator: true,
+              text: "How does your bank use technology to identify suspicious transactions or possible fraud?",
+              example: "Detecting unusual spending patterns, unexpected purchases, or transactions that do not match a customer's normal activity.",
+              options: [
+                { value: 1, label: "Fraud detection depends heavily on employees reviewing transactions manually." },
+                { value: 2, label: "We use basic automated alerts to flag certain transactions." },
+                { value: 3, label: "We use advanced analytics or AI to help identify unusual patterns and send suspicious activity for review." },
+                { value: 4, label: "We regularly check how accurately our fraud detection systems identify threats and how often they create unnecessary alerts." },
+                { value: 5, label: "We use fraud trends, investigation results, and regular testing to improve our detection systems while keeping appropriate human oversight." }
+              ]
+            },
+            {
+              id: "Q15",
+              number: 15,
+              isAiIndicator: true,
+              text: "Does your bank use AI or a knowledge base to help employees find answers and complete their work?",
+              example: "An employee asks an internal AI assistant how to handle a banking procedure, and the system finds the answer using approved company documentation.",
+              options: [
+                { value: 1, label: "Employees usually have to search through documents or ask coworkers for information." },
+                { value: 2, label: "We have digital documentation, but finding the right information can take time." },
+                { value: 3, label: "Employees can use a centralized knowledge base or approved AI tools to help with common questions and tasks." },
+                { value: 4, label: "Employees use AI-assisted tools to find information more quickly, and the bank checks that the information is accurate and secure." },
+                { value: 5, label: "We regularly review how helpful these tools are, update the information they use, and make improvements based on employee feedback and usage results." }
+              ]
+            },
+            {
+              id: "Q16",
+              number: 16,
+              isAiIndicator: true,
+              text: "What safeguards does your bank have when AI is involved in important financial decisions?",
+              example: "AI reviews a loan application and provides a recommendation, but an authorized banker must review and approve the final decision.",
+              options: [
+                { value: 1, label: "We do not have clear rules about when an AI recommendation or automated decision needs human review." },
+                { value: 2, label: "Some decisions are reviewed by employees, but the requirements are not consistent." },
+                { value: 3, label: "We have written policies requiring authorized employees to review sensitive decisions supported by AI." },
+                { value: 4, label: "Our systems enforce approval requirements, restrict access, and record who reviewed important decisions." },
+                { value: 5, label: "We regularly test these safeguards, monitor AI-supported decisions for problems, and improve protections against mistakes, misuse, and security threats." }
+              ]
+            }
+          ]
+        },
+        {
+          id: "D5",
+          name: "Omnichannel Banking Customer Experience",
+          stages: {
+            1: "Stage 1 - Initial: Customers must rely heavily on branches or contact centers to complete routine banking activities, and digital channels provide limited transactional functionality. Customer information and service histories are fragmented, often requiring customers to repeat information when switching channels.",
+            2: "Stage 2 - Emerging: Customers can complete common transactions through online or mobile banking, but more complex activities frequently require separate branch or contact-center interactions. The bank measures channel usage and basic satisfaction but has limited visibility into complete customer journeys.",
+            3: "Stage 3 - Defined: The bank supports standardized digital journeys for major activities such as account opening, payments, card servicing, and selected loan applications. Customer feedback, transaction completion rates, and journey-level performance measures are regularly reviewed to identify service improvements.",
+            4: "Stage 4 - Integrated: Customers can move between mobile, online, branch, and contact-center channels while retaining relevant account information and interaction context. The bank uses governed customer data, journey analytics, and structured feedback to improve completion rates, reduce customer effort, and personalize appropriate services.",
+            5: "Stage 5 - Optimized: The bank continuously improves customer journeys using behavioral analytics, controlled experimentation, and measured customer outcomes. Integrated channels deliver context-aware, accessible, and personalized experiences, with demonstrated improvements in customer effort, resolution quality, retention, and service effectiveness."
+          },
+          questions: [
+            {
+              id: "Q17",
+              number: 17,
+              text: "What banking activities can customers complete using your mobile banking app?",
+              example: "Depositing a check using a phone camera, transferring money, paying bills, or reviewing account activity without visiting a branch.",
+              options: [
+                { value: 1, label: "Customers can complete very few banking activities through our mobile app or website." },
+                { value: 2, label: "Customers can check balances and complete some basic transactions." },
+                { value: 3, label: "Our mobile app supports common activities such as check deposits, money transfers, and account management." },
+                { value: 4, label: "Customers can complete most everyday banking activities through the app without needing help from an employee." },
+                { value: 5, label: "We offer a wide range of reliable mobile services and regularly improve them based on customer feedback and how people use the app." }
+              ]
+            },
+            {
+              id: "Q18",
+              number: 18,
+              text: "What security features does your bank provide to protect customers using online or mobile banking?",
+              example: "Multifactor authentication, fingerprint or facial recognition, alerts about suspicious logins, and the ability to lock a lost debit card.",
+              options: [
+                { value: 1, label: "Customers have limited security options beyond a username and password." },
+                { value: 2, label: "Some additional security features are available, but protection options are limited." },
+                { value: 3, label: "We offer established security features such as multifactor authentication, secure login methods, and account alerts." },
+                { value: 4, label: "Customers have several ways to protect their accounts, and we regularly review whether those protections are effective." },
+                { value: 5, label: "We use security testing, emerging threat information, and customer feedback to keep improving account protection without making banking unnecessarily difficult." }
+              ]
+            },
+            {
+              id: "Q19",
+              number: 19,
+              text: "How does your bank help customers learn to use new digital banking features?",
+              example: "Providing tutorials or simple instructions that show customers how to make mobile deposits, transfer money, or use a newly introduced feature.",
+              options: [
+                { value: 1, label: "We provide little guidance on how to use our digital banking services." },
+                { value: 2, label: "Basic instructions are available, but customers often have to figure things out themselves." },
+                { value: 3, label: "We provide clear instructions and support resources for our main digital features." },
+                { value: 4, label: "We ask customers about their experience and use their feedback to improve instructions and make our services easier to use." },
+                { value: 5, label: "We regularly test how customers use our services and improve both the features and the guidance available to them." }
+              ]
+            },
+            {
+              id: "Q20",
+              number: 20,
+              text: "How easy is it for a customer to speak with a real employee when automated support cannot help them?",
+              example: "A customer contacts an AI chatbot about a disputed transaction. If the chatbot cannot resolve the issue, the customer can reach a real employee without having to explain everything again.",
+              options: [
+                { value: 1, label: "Customers often struggle to get help when they cannot resolve an issue on their own." },
+                { value: 2, label: "Customers can reach an employee, but the process may involve several steps or repeating information." },
+                { value: 3, label: "We provide a clear way for customers to move from automated support to a human representative." },
+                { value: 4, label: "Customers can be transferred to an employee with relevant information from the earlier conversation, and we track how successfully issues are resolved." },
+                { value: 5, label: "We regularly review customer satisfaction and support results to improve both automated assistance and access to real employees." }
+              ]
+            }
+          ]
+        }
+      ],
+
+      // Exact Team 1 Banking Digital Maturity Assessment Interpretation Guide
+      interpretationProfiles: [
+        {
+          id: "foundation_gap",
+          number: 1,
+          name: "1. DIGITAL FOUNDATION GAP",
+          patternRule: "All five dimensions: 1.0–2.0",
+          description:
+            "Digital capabilities are weak across leadership, people, infrastructure, operations, and customer experience. Fragmented systems and inconsistent practices make isolated investments unlikely to generate sustained value.",
+          nextAction:
+            "Create an executive-sponsored 12-month roadmap prioritizing banking data integration, process standardization, and measurable outcomes."
+        },
+        {
+          id: "optimized_bank",
+          number: 2,
+          name: "2. DIGITALLY OPTIMIZED BANK",
+          patternRule: "All five dimensions: 4.0–5.0",
+          description:
+            "The bank has integrated digital capabilities, supported by effective governance and measurable customer and operational results. Its next challenge is differentiation through continuous innovation rather than foundational modernization.",
+          nextAction:
+            "Pilot AI-enabled financial personalization with defined engagement, financial-value, and model-risk measures."
+        },
+        {
+          id: "data_bottleneck",
+          number: 3,
+          name: "3. DATA INFRASTRUCTURE BOTTLENECK",
+          patternRule: "D3 ≥ 1.5 points below the mean of D1, D2, D4, D5",
+          description:
+            "Banking services and transformation ambitions exceed the capability of underlying systems and data. Fragmented account, customer, and transaction information constrains scalability and reliable decision-making.",
+          nextAction:
+            "Integrate and govern customer and transaction data across deposit, lending, and payment platforms."
+        },
+        {
+          id: "digitalized_not_transforming",
+          number: 4,
+          name: "4. DIGITALIZED BUT NOT TRANSFORMING",
+          patternRule: "D5 ≥ 4.0; dedicated AI/ML indicator within D4 ≤ 2.0",
+          description:
+            "Customer-facing channels are mature, but operational intelligence lags behind. Digital interfaces may still rely on manual decisions and inefficient exception handling.",
+          nextAction:
+            "Pilot governed AI-assisted loan triage, tracking turnaround time, accuracy, and human review."
+        },
+        {
+          id: "execution_gap",
+          number: 5,
+          name: "5. DIGITAL EXECUTION GAP",
+          patternRule: "D2 ≥ 1.5 points below the mean of D1, D3, D4, D5",
+          description:
+            "Technology capability has advanced faster than employee proficiency and adoption. Skills gaps and inconsistent change practices prevent the bank from realizing expected benefits.",
+          nextAction:
+            "Launch role-based digital proficiency and adoption support in one banking function, measuring tool use and process results."
+        }
+      ]
+    };
+
+    let radarChartInstance = null;
+
+    // =========================================================================
+    // 2. DYNAMIC FORM RENDERING
+    // =========================================================================
+    function renderAssessmentForm() {
+      const container = document.getElementById("questions-container");
+      container.innerHTML = "";
+
+      ASSESSMENT_DATA.dimensions.forEach((dim) => {
+        const card = document.createElement("div");
+        card.className = "dimension-card";
+
+        const header = document.createElement("div");
+        header.className = "dimension-header";
+        header.innerHTML = `<h2>${dim.id}. ${dim.name}</h2>`;
+        card.appendChild(header);
+
+        dim.questions.forEach((q) => {
+          const qBlock = document.createElement("div");
+          qBlock.className = "question-block";
+          qBlock.id = `block-${q.id}`;
+
+          const qTitle = document.createElement("span");
+          qTitle.className = "question-title";
+          qTitle.textContent = `Question ${q.number}: ${q.text}`;
+          qBlock.appendChild(qTitle);
+
+          if (q.example) {
+            const qEx = document.createElement("div");
+            qEx.className = "question-example";
+            qEx.innerHTML = `<strong>Example:</strong> ${q.example}`;
+            qBlock.appendChild(qEx);
+          }
+
+          q.options.forEach((opt) => {
+            const label = document.createElement("label");
+            label.className = "option-label";
+
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = q.id;
+            radio.value = opt.value;
+
+            radio.addEventListener("change", () => {
+              qBlock.classList.remove("unanswered");
+            });
+
+            const span = document.createElement("span");
+            span.textContent = `${opt.value}. ${opt.label}`;
+
+            label.appendChild(radio);
+            label.appendChild(span);
+            qBlock.appendChild(label);
+          });
+
+          card.appendChild(qBlock);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // 3. VALIDATION & SCORING ALGORITHM
+    // =========================================================================
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      const errorBanner = document.getElementById("error-banner");
+      let allAnswered = true;
+      let firstUnansweredEl = null;
+
+      const dimensionResults = [];
+      let aiIndicatorSum = 0;
+      let aiIndicatorCount = 0;
+
+      ASSESSMENT_DATA.dimensions.forEach((dim) => {
+        let sum = 0;
+        let count = 0;
+
+        dim.questions.forEach((q) => {
+          const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+          const block = document.getElementById(`block-${q.id}`);
+
+          if (!selected) {
+            allAnswered = false;
+            block.classList.add("unanswered");
+            if (!firstUnansweredEl) firstUnansweredEl = block;
+          } else {
+            block.classList.remove("unanswered");
+            const val = parseInt(selected.value, 10);
+            sum += val;
+            count += 1;
+
+            if (q.isAiIndicator) {
+              aiIndicatorSum += val;
+              aiIndicatorCount += 1;
+            }
+          }
+        });
+
+        const avg = count > 0 ? Number((sum / count).toFixed(2)) : 0;
+        dimensionResults.push({
+          id: dim.id,
+          name: dim.name,
+          score: avg,
+          stages: dim.stages
+        });
+      });
+
+      if (!allAnswered) {
+        errorBanner.style.display = "block";
+        firstUnansweredEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      errorBanner.style.display = "none";
+      const aiIndicatorAvg = aiIndicatorCount > 0 ? Number((aiIndicatorSum / aiIndicatorCount).toFixed(2)) : 0;
+      displayResults(dimensionResults, aiIndicatorAvg);
+    }
+
+    /**
+     * Identifies the two lowest-scoring dimensions, properly handling ties.
+     */
+    function findLowestDimensions(results) {
+      const sorted = [...results].sort((a, b) => a.score - b.score);
+      const lowestScore = sorted[0].score;
+      const tiedForFirst = sorted.filter((d) => d.score === lowestScore);
+
+      if (tiedForFirst.length >= 2) {
+        return tiedForFirst;
+      }
+
+      const secondLowestScore = sorted[1].score;
+      const tiedForSecond = sorted.filter((d) => d.score === secondLowestScore);
+      return [...tiedForFirst, ...tiedForSecond];
+    }
+
+    /**
+     * Exact pattern-matching engine aligned to Team 1's Interpretation Guide rules.
+     */
+    function matchInterpretationProfile(results, lowestDims, aiIndicatorAvg) {
+      const s = {};
+      results.forEach((r) => (s[r.id] = r.score));
+
+      const allScores = results.map((r) => r.score);
+      const minScore = Math.min(...allScores);
+      const maxScore = Math.max(...allScores);
+
+      const meanWithoutD3 = (s.D1 + s.D2 + s.D4 + s.D5) / 4;
+      const meanWithoutD2 = (s.D1 + s.D3 + s.D4 + s.D5) / 4;
+
+      // 1. DIGITAL FOUNDATION GAP: All five dimensions 1.0–2.0
+      if (maxScore <= 2.0) {
+        return {
+          profile: ASSESSMENT_DATA.interpretationProfiles.find((p) => p.id === "foundation_gap"),
+          isExactMatch: true
+        };
+      }
+
+      // 2. DIGITALLY OPTIMIZED BANK: All five dimensions 4.0–5.0
+      if (minScore >= 4.0) {
+        return {
+          profile: ASSESSMENT_DATA.interpretationProfiles.find((p) => p.id === "optimized_bank"),
+          isExactMatch: true
+        };
+      }
+
+      // 3. DATA INFRASTRUCTURE BOTTLENECK: D3 >= 1.5 points below mean of D1, D2, D4, D5
+      if (meanWithoutD3 - s.D3 >= 1.5) {
+        return {
+          profile: ASSESSMENT_DATA.interpretationProfiles.find((p) => p.id === "data_bottleneck"),
+          isExactMatch: true
+        };
+      }
+
+      // 4. DIGITALIZED BUT NOT TRANSFORMING: D5 >= 4.0 and dedicated AI/ML indicator within D4 <= 2.0
+      if (s.D5 >= 4.0 && aiIndicatorAvg <= 2.0) {
+        return {
+          profile: ASSESSMENT_DATA.interpretationProfiles.find((p) => p.id === "digitalized_not_transforming"),
+          isExactMatch: true
+        };
+      }
+
+      // 5. DIGITAL EXECUTION GAP: D2 >= 1.5 points below mean of D1, D3, D4, D5
+      if (meanWithoutD2 - s.D2 >= 1.5) {
+        return {
+          profile: ASSESSMENT_DATA.interpretationProfiles.find((p) => p.id === "execution_gap"),
+          isExactMatch: true
+        };
+      }
+
+      // Closest-archetype fallback for intermediate/transitional score profiles
+      const lowestIds = lowestDims.map((d) => d.id);
+      const avgAll = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+
+      let closestId = "foundation_gap";
+      if (avgAll >= 3.6) {
+        closestId = "optimized_bank";
+      } else if (lowestIds.includes("D3")) {
+        closestId = "data_bottleneck";
+      } else if (lowestIds.includes("D2")) {
+        closestId = "execution_gap";
+      } else if (lowestIds.includes("D4") || s.D5 > s.D4) {
+        closestId = "digitalized_not_transforming";
+      } else if (avgAll > 2.0) {
+        closestId = "execution_gap";
+      }
+
+      return {
+        profile: ASSESSMENT_DATA.interpretationProfiles.find((p) => p.id === closestId),
+        isExactMatch: false
+      };
+    }
+
+    // =========================================================================
+    // 4. RESULTS, RADAR CHART & BLENDED INTERPRETATION GUIDE RENDERING
+    // =========================================================================
+    function displayResults(results, aiIndicatorAvg) {
+      const resultsSection = document.getElementById("results-section");
+      resultsSection.style.display = "block";
+
+      const lowestDims = findLowestDimensions(results);
+      const lowestIds = new Set(lowestDims.map((d) => d.id));
+
+      // Populate Dimension Score Table
+      const tbody = document.getElementById("score-table-body");
+      tbody.innerHTML = "";
+      results.forEach((r) => {
+        const isPriorityGap = lowestIds.has(r.id);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <strong>${r.id}:</strong> ${r.name}
+            ${isPriorityGap ? '<span class="badge-low">Lowest Dimension</span>' : ""}
+          </td>
+          <td><strong>${r.score.toFixed(2)}</strong> / 5.00</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Match Strategic Archetype
+      const matchResult = matchInterpretationProfile(results, lowestDims, aiIndicatorAvg);
+      const profile = matchResult.profile;
+      const matchLabel = matchResult.isExactMatch ? "Matched Strategic Profile" : "Closest Strategic Archetype";
+
+      const lowestListText = lowestDims
+        .map((d) => `<strong>${d.id}. ${d.name} (${d.score.toFixed(2)})</strong>`)
+        .join(" and ");
+
+      const primaryGap = lowestDims[0];
+      const roundedStage = Math.max(1, Math.min(5, Math.round(primaryGap.score)));
+      const stageDescription = primaryGap.stages[roundedStage];
+
+      // Render Primary Diagnosis Box
+      const interpDiv = document.getElementById("interpretation-output");
+      interpDiv.innerHTML = `
+        <div class="pattern-pill">${matchLabel} &bull; ${profile.patternRule}</div>
+        <h3>${profile.name}</h3>
+        <p><strong>Priority Capability Gaps (Lowest-Scoring Dimensions):</strong> ${lowestListText}</p>
+        <p>${profile.description}</p>
+        <div class="next-action">
+          <strong>Recommended Next Action:</strong> ${profile.nextAction}
+        </div>
+        <div class="stage-reference">
+          <strong>Observable State in Primary Gap (${primaryGap.id} — ${primaryGap.name}):</strong><br/>
+          ${stageDescription}
+        </div>
+      `;
+
+      // Render Complete Blended 5-Archetype Interpretation Guide
+      const guideContainer = document.getElementById("full-guide-container");
+      guideContainer.innerHTML = "";
+
+      ASSESSMENT_DATA.interpretationProfiles.forEach((item) => {
+        const isMatched = item.id === profile.id;
+        const card = document.createElement("div");
+        card.className = `archetype-card ${isMatched ? "matched-archetype" : ""}`;
+        card.innerHTML = `
+          <div class="archetype-header">
+            <span class="archetype-title">${item.name}</span>
+            ${isMatched ? `<span class="badge-match">${matchResult.isExactMatch ? "Your Bank's Profile" : "Closest Match"}</span>` : ""}
+          </div>
+          <div class="archetype-signal">Pattern: ${item.patternRule}</div>
+          <div>${item.description}</div>
+          <div class="archetype-action"><strong>Next action:</strong> ${item.nextAction}</div>
+        `;
+        guideContainer.appendChild(card);
+      });
+
+      renderRadarChart(results);
+      resultsSection.scrollIntoView({ behavior: "smooth" });
+    }
+
+    function renderRadarChart(results) {
+      const ctx = document.getElementById("maturityRadarChart").getContext("2d");
+
+      if (radarChartInstance) {
+        radarChartInstance.destroy();
+      }
+
+      const labels = results.map((r) => `${r.id}: ${r.name}`);
+      const dataPoints = results.map((r) => r.score);
+
+      radarChartInstance = new Chart(ctx, {
+        type: "radar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Bank Maturity Score (1–5)",
+              data: dataPoints,
+              fill: true,
+              backgroundColor: "rgba(15, 61, 94, 0.2)",
+              borderColor: "rgb(15, 61, 94)",
+              pointBackgroundColor: "rgb(0, 128, 128)",
+              pointBorderColor: "#fff",
+              pointHoverBackgroundColor: "#fff",
+              pointHoverBorderColor: "rgb(0, 128, 128)"
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              min: 0,
+              max: 5,
+              ticks: {
+                stepSize: 1
+              },
+              pointLabels: {
+                font: {
+                  size: 11,
+                  weight: "600"
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: "bottom"
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 5. DEMO HELPERS FOR TESTING ALL 5 TEAM 1 ARCHETYPES
+    // =========================================================================
+    function fillPatternDemo(patternId) {
+      const presets = {
+        foundation_gap: { D1: 1, D2: 2, D3: 1, D4: 2, D5: 1 },
+        optimized_bank: { D1: 5, D2: 4, D3: 5, D4: 4, D5: 5 },
+        data_bottleneck: { D1: 4, D2: 4, D3: 2, D4: 4, D5: 4 },
+        digitalized_not_transforming: { D1: 4, D2: 3, D3: 3, D4: 2, D5: 4 },
+        execution_gap: { D1: 4, D2: 2, D3: 4, D4: 4, D5: 4 }
+      };
+
+      const target = presets[patternId];
+      ASSESSMENT_DATA.dimensions.forEach((dim) => {
+        dim.questions.forEach((q) => {
+          const val = target[dim.id];
+          const radio = document.querySelector(`input[name="${q.id}"][value="${val}"]`);
+          if (radio) radio.checked = true;
+        });
+      });
+    }
+
+    function resetAssessment() {
+      document.getElementById("assessment-form").reset();
+      document.getElementById("results-section").style.display = "none";
+      document.getElementById("error-banner").style.display = "none";
+      document.querySelectorAll(".question-block").forEach((el) => el.classList.remove("unanswered"));
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderAssessmentForm();
+      document.getElementById("assessment-form").addEventListener("submit", handleFormSubmit);
+    });
+  </script>
+</body>
+</html>
